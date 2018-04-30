@@ -4,7 +4,7 @@
 # for full license information.
 # ==============================================================================
 
-import sys
+import os, sys
 import random
 from argparse import ArgumentParser
 
@@ -107,6 +107,7 @@ def playGame(args):
     try:
         for cd in customer_demand:
             i += 1
+            _ = os.system('clear')
             print(f"\n+----- WEEK #{i} -----+") 
             deliv, r_out, il, cost = retailer.play(incoming = r_w_delay[0], order = cd)
             r_w_delay[0] = r_w_delay[1]
