@@ -5,6 +5,7 @@
 # ==============================================================================
 
 import sys
+import random
 from argparse import ArgumentParser
 
 
@@ -69,8 +70,9 @@ def playGame(args):
     retailer, wholesaler, distributor, factory = createAgents(args)
     
     # Initializations
-    customer_demand = [5,5,5,5,5,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]
-
+    customer_demand = [5,5,5,5,5,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]
+    customer_demand = customer_demand[:random.randint(30,50)] # End the game after a random number of weeks
+    
     # Order out-and-inboxes
     r_out = 0 # retailer outbox
     w_out = 0 # wholesaler outbox
