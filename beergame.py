@@ -7,38 +7,36 @@
 import os, sys
 import random
 from argparse import ArgumentParser
-
+import json
 
 import pandas as pd
 
 from stage import Stage
 
     
-def createAgents(args):
+def createAgents(args, data):
     """
     """
     
+    il=data['inventory']
+    ch=data['holding_cost']
+    cp=data['shortage_cost']
+    bs=data['base_stock']
+    
     # Instantiate agents/stages
+    retailer = Stage("Retailer", inventory=il, holding_cost=ch, shortage_cost=cp, base_stock=bs)
+    wholesaler = Stage("Wholesaler", inventory=il, holding_cost=ch, shortage_cost=cp, base_stock=bs)
+    distributor = Stage("Distributor", inventory=il, holding_cost=ch, shortage_cost=cp, base_stock=bs)
+    factory = Stage("Factory", inventory=il, holding_cost=ch, shortage_cost=cp, base_stock=bs)
+    
     if args['agent'] == 'retailer':
-        retailer = Stage("Retailer")
-        wholesaler = Stage("Wholesaler", strategy='base-stock-policy')
-        distributor = Stage("Distributor", strategy='base-stock-policy')
-        factory = Stage("Factory", strategy='base-stock-policy')
+        retailer.set_strategy('human')
     elif args['agent'] == 'wholesaler':
-        retailer = Stage("Retailer", strategy='base-stock-policy')
-        wholesaler = Stage("Wholesaler")
-        distributor = Stage("Distributor", strategy='base-stock-policy')
-        factory = Stage("Factory", strategy='base-stock-policy')
+        wholesaler.set_strategy('human')
     elif args['agent'] == 'distributor':
-        retailer = Stage("Retailer", strategy='base-stock-policy')
-        wholesaler = Stage("Wholesaler", strategy='base-stock-policy')
-        distributor = Stage("Distributor")
-        factory = Stage("Factory", strategy='base-stock-policy')
+        distributor.set_strategy('human')
     elif args['agent'] == 'distributor':
-        retailer = Stage("Retailer", strategy='base-stock-policy')
-        wholesaler = Stage("Wholesaler", strategy='base-stock-policy')
-        distributor = Stage("Distributor", strategy='base-stock-policy')
-        factory = Stage("Factory")
+        factory.set_strategy('human')
     else:
         print('Error in argument')
         sys.exit(1)
@@ -66,8 +64,11 @@ def playGame(args):
     """
     """
     
+    with open(args['param']) as data_file:    
+        data = json.load(data_file)
+    
     # Instantiate agents / stages
-    retailer, wholesaler, distributor, factory = createAgents(args)
+    retailer, wholesaler, distributor, factory = createAgents(args, data)
     
     # Initializations
     customer_demand = [5,5,5,5,5,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]
@@ -107,7 +108,8 @@ def playGame(args):
     try:
         for cd in customer_demand:
             i += 1
-            _ = os.system('clear')
+            _ = os.system('cls' if os.name == 'nt' else 'clear')
+            
             print(f"\n+----- WEEK #{i} -----+") 
             deliv, r_out, il, cost = retailer.play(incoming = r_w_delay[0], order = cd)
             r_w_delay[0] = r_w_delay[1]
@@ -147,12 +149,14 @@ def main():
     """
     parser = ArgumentParser(description='Beer Game')
     parser.add_argument('-a','--agent', help='retailer / wholesaler / distributor / factory', required=True)
+    parser.add_argument('-p','--param', help='parameters file', required=False)
     args = vars(parser.parse_args())
     playGame(args)
 
 
 if __name__ == "__main__":
     """
+    Entry point, execute only if run as a script
     """
     main()
    

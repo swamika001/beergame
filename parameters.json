@@ -1,0 +1,6 @@
+{
+    "inventory": 15,
+    "holding_cost": 0.5,
+    "shortage_cost": 1.0,
+    "base_stock": 15
+}

@@ -6,9 +6,8 @@
 
 class Stage:
 
-    def __init__(self, name, inventory = 15, holding_cost=0.5 , shortage_cost=1.0, base_stock=15, strategy='human'):
+    def __init__(self, name, inventory=15, holding_cost=0.5, shortage_cost=1.0, base_stock=15, strategy='base-stock-policy'):
         """
-        
         Args:
         name (str): name of the stage
         
@@ -28,40 +27,55 @@ class Stage:
         self.to_ship = 0
         self.delivery = 0
         self.new_order = 0
+
+        self.demand = 0
+        self.incoming = 0
         
         self.strategy = strategy
         self.base_stock = base_stock
         
-        
         self.OO = 0 # On-order items
     
     def new_delivery(self, incoming):
+        """
+        """
+        self.incoming = incoming
         self.available = self.inventory + incoming
         self.OO -= incoming
     
     def new_incoming_order(self, order):
+        """
+        """
+        self.demand = order
         self.to_ship = self.backorder + order
         
     def prepare_delivery(self):
+        """
+        """
         if self.to_ship >= self.available:
             self.delivery = self.available
         else:
             self.delivery = self.to_ship
     
     def calculate_backorder(self):
+        """
+        """
         if self.to_ship > self.available:
             self.backorder = self.to_ship - self.available
         else:
             self.backorder = 0    
     
     def calculate_inventory(self):
+        """
+        """
         if self.to_ship > self.available:
             self.inventory = 0
         else:
             self.inventory = self.available - self.to_ship
     
     def place_new_order(self, incoming, order):
-        
+        """
+        """
         if self.strategy == 'human':
             print(" ")
             print(self.name)
@@ -93,11 +107,38 @@ class Stage:
             
         
         
-            
-    def get_OO(self):
+    @property        
+    def get_state_variable_OO(self):
+        """
+        On-order items (State variable)
+        """
         return self.OO
     
+    @property
+    def get_state_variable_d(self):
+        """
+        demand / order (State variable)
+        """
+        return self.demand
+
+    @property
+    def get_state_variable_RS(self):
+        """
+        Received Shipment (State variable)
+        """
+        return self.incoming
+
+    def set_strategy(self, strategy):
+        """
+        Strategy setter
+        """
+        self.strategy = strategy
+        #TODO: validate strategy with Regex
+    
+
     def compute_costs(self):
+        """
+        """
         if self.inventory > 0:
             cost = self.ch * self.inventory
         elif self.backorder > 0:
@@ -110,7 +151,8 @@ class Stage:
         
     
     def play(self, incoming, order):
-
+        """
+        """
         self.new_delivery(incoming)
         self.new_incoming_order(order)
         self.prepare_delivery()
