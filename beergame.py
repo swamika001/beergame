@@ -70,8 +70,8 @@ def playGame(args):
     # Instantiate agents / stages
     retailer, wholesaler, distributor, factory = createAgents(args, data)
     
-    # Initializations
-    customer_demand = [5,5,5,5,5,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]
+    # Initialize customer demand (d0)
+    customer_demand = 5*[5] + 45*[9]
     customer_demand = customer_demand[:random.randint(30,50)] # End the game after a random number of weeks
     
     # Order out-and-inboxes
@@ -101,7 +101,7 @@ def playGame(args):
            'distributor' : [0],
            'factory' : [0],
            }
-
+    
 
     i = 0
 
@@ -110,27 +110,31 @@ def playGame(args):
             i += 1
             _ = os.system('cls' if os.name == 'nt' else 'clear')
             
+            if args['verbose']:
+                print('State Variable:')
+                print(wholesaler.get_state_variable)
+                
             print(f"\n+----- WEEK #{i} -----+") 
-            deliv, r_out, il, cost = retailer.play(incoming = r_w_delay[0], order = cd)
+            deliv, r_out, cost = retailer.play(incoming = r_w_delay[0], order = cd)
             r_w_delay[0] = r_w_delay[1]
             costs['retailer'].append(cost)
-            ILs['retailer'].append(il)
+            ILs['retailer'].append(retailer.get_environment['IL'])
 
-            r_w_delay[1], w_out, il, cost = wholesaler.play(incoming = w_d_delay[0], order = w_in)
+            r_w_delay[1], w_out, cost = wholesaler.play(incoming = w_d_delay[0], order = w_in)
             w_d_delay[0] = w_d_delay[1]
             costs['wholesaler'].append(cost)
-            ILs['wholesaler'].append(il)
+            ILs['wholesaler'].append(wholesaler.get_environment['IL'])
 
-            w_d_delay[1], d_out, il, cost = distributor.play(incoming = d_f_delay[0], order = d_in)
+            w_d_delay[1], d_out, cost = distributor.play(incoming = d_f_delay[0], order = d_in)
             d_f_delay[0] = d_f_delay[1]
             costs['distributor'].append(cost)
-            ILs['distributor'].append(il)
+            ILs['distributor'].append(distributor.get_environment['IL'])
 
-            d_f_delay[1], f_out, il, cost = factory.play(incoming = f_delay[0], order = f_in)
+            d_f_delay[1], f_out, cost = factory.play(incoming = f_delay[0], order = f_in)
             f_delay[0] = f_delay[1]
             f_delay[1] = f_out
             costs['factory'].append(cost)
-            ILs['factory'].append(il)
+            ILs['factory'].append(factory.get_environment['IL'])
 
             w_in = r_out
             d_in = w_out
@@ -150,6 +154,7 @@ def main():
     parser = ArgumentParser(description='Beer Game')
     parser.add_argument('-a','--agent', help='retailer / wholesaler / distributor / factory', required=True)
     parser.add_argument('-p','--param', help='parameters file', required=False)
+    parser.add_argument('-v','--verbose', help='verbose mode', action="store_true")
     args = vars(parser.parse_args())
     playGame(args)
 
